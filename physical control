@@ -1,4 +1,4 @@
-phý#include <Stepper.h>
+#include <Stepper.h>
 #include <Servo.h>
 
 const int Bt1 = A0;
