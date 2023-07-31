@@ -1,0 +1,136 @@
+#include <Stepper.h>
+#include <Servo.h>
+
+const int Bt1 = A0;
+const int Bt2 = A1;
+const int Bt3 = A2;
+const int Bt4 = A3;
+const int Bt5 = A4;
+const int Bt6 = A5;
+const int Bt7 = A6;
+
+const int stepsPerRevolution = 512;
+
+Stepper myStepper1(stepsPerRevolution, 22, 26, 24, 28);
+Stepper myStepper2(stepsPerRevolution, 30, 34, 32, 36);
+Stepper myStepper3(stepsPerRevolution, 38, 42, 40, 44);
+
+int motorSpeed = 90;
+
+Servo monServo;
+
+char value;
+boolean EtatBt1;
+boolean Etatpince = 0;
+unsigned long currentTime = 0;
+unsigned long previousTime = 0;
+
+void setup() {
+  Serial.begin(9600);
+  pinMode(Bt1, INPUT_PULLUP);
+  pinMode(Bt2, INPUT_PULLUP);
+  pinMode(Bt3, INPUT_PULLUP);
+  pinMode(Bt4, INPUT_PULLUP);
+  pinMode(Bt5, INPUT_PULLUP);
+  pinMode(Bt6, INPUT_PULLUP);
+  pinMode(Bt7, INPUT_PULLUP);
+
+  myStepper1.setSpeed(motorSpeed);
+  myStepper2.setSpeed(motorSpeed);
+  myStepper3.setSpeed(motorSpeed);
+
+  monServo.attach(8);
+}
+
+void loop() {
+  currentTime = millis();
+  if ((currentTime - previousTime) > 100) {
+    if (digitalRead(Bt1) == LOW && EtatBt1 == LOW) {
+      Etatpince = !Etatpince;
+      EtatBt1 = HIGH;
+      previousTime = currentTime;
+      if (Etatpince == 1) {
+        monServo.write(3);
+      }
+      else {
+        monServo.write(70);
+      }
+    }
+    if (digitalRead(Bt1) == HIGH && EtatBt1 == HIGH) {
+      EtatBt1 = LOW;
+      previousTime = currentTime;
+    }
+  }
+
+  if (Serial.available() > 0) {
+    value = Serial.read();
+  }
+
+  if (digitalRead(Bt2) == LOW && digitalRead(Bt3) == HIGH) {
+    myStepper1.step(1);
+  }
+  if (digitalRead(Bt3) == LOW && digitalRead(Bt2) == HIGH) {
+    myStepper1.step(-1);
+  }
+  if (digitalRead(Bt2) == HIGH && digitalRead(Bt3) == HIGH) {
+    myStepper1.step(0);
+    
+  }
+
+  if (digitalRead(Bt4) == LOW && digitalRead(Bt5) == HIGH) {
+    myStepper2.step(1);
+  }
+  if (digitalRead(Bt5) == LOW && digitalRead(Bt4) == HIGH) {
+    myStepper2.step(-1);
+  }
+  if (digitalRead(Bt4) == HIGH && digitalRead(Bt5) == HIGH) {
+    myStepper2.step(0);
+  
+  }
+
+  if (digitalRead(Bt6) == LOW && digitalRead(Bt7) == HIGH) {
+    myStepper3.step(1);
+  }
+  if (digitalRead(Bt7) == LOW && digitalRead(Bt6) == HIGH) {
+    myStepper3.step(-1);
+  }
+  if (digitalRead(Bt6) == HIGH && digitalRead(Bt7) == HIGH) {
+    myStepper3.step(0);
+   
+  }
+
+  switch (value) {
+      case 'F': 
+        myStepper1.step(1);
+        break;
+      case 'B': 
+        myStepper1.step(-1);
+        break;
+      case 'L': 
+        myStepper3.step(1);
+        break;
+      case 'R': 
+        myStepper3.step(-1);
+        break;
+      case 'G':
+        myStepper2.step(1);
+        break;
+      case 'I':
+        myStepper2.step(-1);
+        break;
+      case 'V':
+        monServo.write(3);
+        break;
+      case 'U':
+        monServo.write(70);
+        break;
+
+      default:
+        break;
+}
+  if (value != 'F' && value != 'B' && value != 'L' && value != 'R' && value != 'G' && value != 'I') {
+    myStepper1.step(0);
+    myStepper2.step(0);
+    myStepper3.step(0);
+
+  }}
